@@ -1,0 +1,23 @@
+import {spawnSync} from 'node:child_process';
+import path from 'node:path';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,rm,lstat,symlink,mkdir,writeFile,chmod} from 'node:fs/promises';import {join} from 'node:path';import {tmpdir} from 'node:os';import {protectDirectory as rawProtectDirectory,protectDirectorySync as rawProtectDirectorySync,protectFileSync as rawProtectFileSync} from '../lib/storage-security.mjs';
+process.env.NODE_ENV='test';
+const protectDirectory=async(...args)=>{try{return await rawProtectDirectory(...args)}catch(error){reportAclError(error)}};
+const protectDirectorySync=(...args)=>{try{return rawProtectDirectorySync(...args)}catch(error){reportAclError(error)}};
+const protectFileSync=(...args)=>{try{return rawProtectFileSync(...args)}catch(error){reportAclError(error)}};
+function reportAclError(error){if(process.platform==='win32'&&error.cause)console.error('Windows ACL test diagnostic:',error.cause.message);throw error}
+process.on('uncaughtExceptionMonitor',error=>{if(process.platform==='win32'&&error.cause)console.error('Windows ACL test diagnostic:',error.cause.message)});
+test('private storage accepts native temp paths and protects existing and nested directories',async t=>{const root=await mkdtemp(join(tmpdir(),'video-private-'));t.after(()=>rm(root,{recursive:true,force:true}));await protectDirectory(root);const child=join(root,'data','nested');protectDirectorySync(child);assert.ok((await lstat(child)).isDirectory());if(process.platform!=='win32'){assert.equal((await lstat(root)).mode&0o777,0o700);assert.equal((await lstat(child)).mode&0o777,0o700);}});
+test('storage rejects linked parents before creating anything in their destination',async t=>{const root=await mkdtemp(join(tmpdir(),'video-links-'));t.after(()=>rm(root,{recursive:true,force:true}));const actual=join(root,'actual'),linked=join(root,'linked');await mkdir(actual);await symlink(actual,linked,process.platform==='win32'?'junction':'dir');assert.throws(()=>protectDirectorySync(join(linked,'new-data')),/symlinks/);await assert.rejects(lstat(join(actual,'new-data')),{code:'ENOENT'});});
+
+test('existing private files are secured and linked targets rejected',async t=>{const root=await mkdtemp(join(tmpdir(),'video-files-'));t.after(()=>rm(root,{recursive:true,force:true}));const file=join(root,'jobs.json');await writeFile(file,'{}',{mode:0o666});protectDirectorySync(root);protectFileSync(file);if(process.platform!=='win32')assert.equal((await lstat(file)).mode&0o777,0o600);const link=join(root,'linked.json');if(process.platform!=='win32'){await symlink(file,link);assert.throws(()=>protectFileSync(link),/regular file/)}assert.throws(()=>protectFileSync(root),/regular file/);});
+test('directory protection is reapplied after permissions change',async t=>{const root=await mkdtemp(join(tmpdir(),'video-reprotect-'));t.after(()=>rm(root,{recursive:true,force:true}));protectDirectorySync(root);if(process.platform!=='win32'){await chmod(root,0o755);protectDirectorySync(root);assert.equal((await lstat(root)).mode&0o777,0o700)}});
+
+test('Windows ACL grants only current owner and SYSTEM on directory and existing file',{skip:process.platform!=='win32'},async t=>{
+ const root=await mkdtemp(join(tmpdir(),'video-acl-'));t.after(()=>rm(root,{recursive:true,force:true}));const file=join(root,'existing.json');await writeFile(file,'{}');
+ try{protectDirectorySync(root);protectFileSync(file)}catch(error){reportAclError(error)}
+ const script=`$ErrorActionPreference='Stop';$owner=[System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value;foreach($acl in @([System.IO.Directory]::GetAccessControl($env:EASY_AGENT_TEST_DIR),[System.IO.File]::GetAccessControl($env:EASY_AGENT_TEST_FILE))){if(-not $acl.AreAccessRulesProtected){throw 'Unprotected ACL'};if($acl.GetOwner([System.Security.Principal.SecurityIdentifier]).Value -ne $owner){throw 'Incorrect owner'};$sids=@($acl.Access | ForEach-Object {$_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value});if($sids.Count -ne 2 -or $sids -notcontains $owner -or $sids -notcontains 'S-1-5-18'){throw 'Unexpected access entries'}}`;
+ const executable=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
+ const result=spawnSync(executable,['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],{env:{...process.env,EASY_AGENT_TEST_DIR:root,EASY_AGENT_TEST_FILE:file},encoding:'utf8',timeout:15000,windowsHide:true});
+ assert.equal(result.status,0,(result.stderr||result.error?.message||'ACL inspection failed').slice(0,4096));
+});

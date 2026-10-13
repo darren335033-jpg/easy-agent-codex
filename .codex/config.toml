@@ -1,0 +1,68 @@
+# Project-scoped configuration; leaves your default provider and global login intact.
+# Start an OmniRoute-backed session with: codex --profile omniroute
+[profiles.omniroute]
+model_provider = "omniroute"
+model = "auto"
+
+[model_providers.omniroute]
+name = "OmniRoute local gateway"
+base_url = "http://127.0.0.1:20128/v1"
+env_key = "OMNIROUTE_API_KEY"
+wire_api = "responses"
+requires_openai_auth = false
+request_max_retries = 1
+stream_max_retries = 1
+stream_idle_timeout_ms = 120000
+
+[mcp_servers.omniroute]
+url = "http://127.0.0.1:20128/api/mcp/stream"
+bearer_token_env_var = "OMNIROUTE_MCP_TOKEN"
+enabled = true
+required = false
+startup_timeout_sec = 15
+tool_timeout_sec = 30
+enabled_tools = ["omniroute_get_health", "omniroute_list_models_catalog", "omniroute_check_quota", "omniroute_cost_report"]
+
+[mcp_servers.huggingface]
+url = "https://huggingface.co/mcp"
+auth = "oauth"
+enabled = true
+required = false
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+
+[mcp_servers.nvidia_cuda_docs]
+url = "https://api.copilot.nsight.ngc.nvidia.com/mcp/cuda-docs"
+auth = "oauth"
+enabled = true
+required = false
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+
+[mcp_servers.cloudflare]
+url = "https://mcp.cloudflare.com/mcp"
+auth = "oauth"
+enabled = false
+required = false
+
+[mcp_servers.sentry]
+url = "https://mcp.sentry.dev/mcp"
+auth = "oauth"
+enabled = true
+required = false
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp"
+auth = "oauth"
+enabled = false
+required = false
+
+# Easy Agent bridge: metadata only; not a native Sandcastle MCP server.
+[mcp_servers.sandcastle_status]
+command = "node"
+args = ["integrations/scripts/sandcastles-status-mcp.mjs"]
+enabled = true
+required = false
+enabled_tools = ["easy_agent_sandcastles_status"]
+startup_timeout_sec = 10
+tool_timeout_sec = 15

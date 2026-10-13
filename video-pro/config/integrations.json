@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "status": "inventory_only",
+  "automaticInstallEnabled": false,
+  "externalActionsPerformed": false,
+  "credentialStorage": "Secrets remain outside manifests and browser code; record only variable names and redacted health metadata.",
+  "integrations": [
+    {
+      "id": "firecrawl",
+      "name": "Firecrawl",
+      "sessionStatus": "plugin_installed_tools_unavailable",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "Plugin installed; no callable Firecrawl tools present in session ALL_TOOLS.",
+      "intendedScope": "Website research and extraction; only approved public sources.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase",
+      "sessionStatus": "read_only_probe_passed_empty_projects",
+      "applicationRuntimeStatus": "not_provisioned",
+      "evidence": "MCP list_projects succeeded and returned no projects.",
+      "intendedScope": "Authentication, projects, storage and row-level isolation after provisioning.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "read_only_project_list_passed",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "remote_desktop_commander",
+      "name": "Remote Desktop Commander",
+      "sessionStatus": "device_online",
+      "applicationRuntimeStatus": "installation_unverified_remote_timeout",
+      "evidence": "DESKTOP-R43JS9N observed online; remote commands timed out. No installation verified.",
+      "intendedScope": "Scoped development inspection on the explicitly selected device.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "sessionStatus": "tools_available",
+      "applicationRuntimeStatus": "source_origin_present",
+      "evidence": "Source origin: github.com/darren335033-jpg/easy-agent-codex.git.",
+      "intendedScope": "Review source, CI results and scoped repository changes.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "sessionStatus": "live_account_observed",
+      "applicationRuntimeStatus": "credentials_not_configured",
+      "evidence": "MCP account EASY AGENT AI exists in live mode; application billing credentials are not configured.",
+      "intendedScope": "Billing integration only after sandbox tests and live readiness review.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "openai_platform",
+      "name": "OpenAI Platform",
+      "sessionStatus": "credential_target_selected",
+      "applicationRuntimeStatus": "key_not_created",
+      "evidence": "Local secret-save approval remains unresolved; no key created.",
+      "intendedScope": "Server-side reasoning and planning after credential setup.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare MCP",
+      "sessionStatus": "tools_unavailable",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "No callable Cloudflare tools available in this session.",
+      "intendedScope": "Hosting and delivery after verified connection.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA MCP",
+      "sessionStatus": "tools_unavailable",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "No callable NVIDIA tools available in this session.",
+      "intendedScope": "Approved inference or compute after verified connection.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device.",
+      "configurationPrepared": true,
+      "connectionVerified": false
+    },
+    {
+      "id": "omniroute",
+      "name": "OmniRoute MCP",
+      "sessionStatus": "identity_confirmed_documented_endpoints",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "User selected diegosouzapw/OmniRoute. Official local MCP HTTP endpoint http://localhost:20128/api/mcp/stream or --mcp stdio; gateway disabled by default until toggled. API base http://localhost:20128/v1. No running connection verified.",
+      "intendedScope": "Routing scope to be established from supplied documentation.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device.",
+      "repository": "https://github.com/diegosouzapw/OmniRoute",
+      "documentedEndpoints": {
+        "mcpHttp": "http://localhost:20128/api/mcp/stream",
+        "apiBase": "http://localhost:20128/v1"
+      },
+      "enabled": false,
+      "configurationPrepared": true,
+      "connectionVerified": false
+    },
+    {
+      "id": "orca_ade",
+      "name": "Orca ADE MCP",
+      "sessionStatus": "identity_confirmed",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "User selected stablyai/orca. Repository identified; installation and runtime connection unverified.",
+      "intendedScope": "Development environment scope to be established from supplied documentation.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device.",
+      "repository": "https://github.com/stablyai/orca"
+    },
+    {
+      "id": "hugging_face",
+      "name": "Hugging Face MCP",
+      "sessionStatus": "plugin_available_not_installed",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "Plugin search reports AVAILABLE with installed false.",
+      "intendedScope": "Model documentation and approved inference after connection.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "google",
+      "name": "Google MCP",
+      "sessionStatus": "service_ambiguous",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "Veo API is selected for video. Drive and Gmail plugins are available but not installed; these are distinct services.",
+      "intendedScope": "Verify exact Google service and documented Veo API access.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "sentry",
+      "name": "Sentry MCP",
+      "sessionStatus": "tools_unavailable",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "No callable Sentry tools available in this session.",
+      "intendedScope": "Error monitoring with redaction after connection.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device.",
+      "configurationPrepared": true,
+      "connectionVerified": false
+    },
+    {
+      "id": "discord",
+      "name": "Discord MCP",
+      "sessionStatus": "tools_unavailable",
+      "applicationRuntimeStatus": "not_configured",
+      "evidence": "No callable Discord tools available in this session.",
+      "intendedScope": "Community workflow scope after connection; no messages authorized here.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "sandcastles",
+      "name": "Sandcastle (Matt Pocock)",
+      "sessionStatus": "official_readme_api_verified",
+      "applicationRuntimeStatus": "gated_scaffold_not_executed",
+      "evidence": "User clue identifies mattpocock/sandcastle; official README and package.json confirm @ai-hero/sandcastle 0.12.0 and Codex/Docker run API. No runtime installation or invocation verified.",
+      "intendedScope": "One isolated coding review iteration; no automatic merge, provider generation, trading or messaging.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device.",
+      "identityStatus": "clarification_pending_creator_video",
+      "configurationPrepared": false,
+      "connectionVerified": false,
+      "repository": "https://github.com/mattpocock/sandcastle",
+      "package": "@ai-hero/sandcastle",
+      "version": "0.12.0",
+      "enabled": false
+    },
+    {
+      "id": "codex_windows_pc",
+      "name": "Codex Windows PC",
+      "sessionStatus": "installation_pending_root_work",
+      "applicationRuntimeStatus": "installation_unverified_remote_timeout",
+      "evidence": "DESKTOP-R43JS9N observed online; remote commands timed out. No installation verified.",
+      "intendedScope": "Development workstation after explicit installation verification.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "iphone_13_pro",
+      "name": "iPhone 13 Pro",
+      "sessionStatus": "responsive_qa_passed_390px",
+      "applicationRuntimeStatus": "live_device_unverified",
+      "evidence": "390px responsive UI QA passed; no physical-device test or sync established.",
+      "intendedScope": "Safari physical-device QA, touch and upload review pending.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "permissions": "Least privilege; read-only discovery first; scope any future writes to a named project, repository or device."
+    },
+    {
+      "id": "agentos",
+      "name": "AgentOS (use-agent-os/agent-os)",
+      "sessionStatus": "official_documentation_verified",
+      "applicationRuntimeStatus": "not_installed_or_verified",
+      "evidence": "Read official README.product.md, README.md, docs/README.md, docs/quickstart.md and docs/mcp-server.md through GitHub. Windows portable release and local stdio MCP bridge documented.",
+      "repository": "https://github.com/use-agent-os/agent-os",
+      "intendedScope": "Local video-project engineering assistance; no trading, wallets or external channels.",
+      "toolsGrantedToAgents": [],
+      "smokeTestStatus": "pending",
+      "enabled": false,
+      "documentedEndpoints": {
+        "controlUi": "http://127.0.0.1:18791/control/",
+        "gatewayWs": "ws://localhost:18791/ws"
+      },
+      "stdioCommand": [
+        "agentos",
+        "mcp-server",
+        "run"
+      ],
+      "permissions": "Workspace-scoped review first; no unattended broad filesystem, network or financial authority."
+    }
+  ],
+  "registryMapping": "Existing engineering, security, testing, provider evaluation, operations and coordination role slots can receive one bounded integration task each; all remain assigned_not_running without tools or spending authority."
+}

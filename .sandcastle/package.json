@@ -1,0 +1,1 @@
+{"name":"easy-agent-sandcastle-integration","private":true,"type":"module","scripts":{"run":"node --env-file-if-exists=.env main.mts"},"devDependencies":{"@ai-hero/sandcastle":"0.12.0"}}

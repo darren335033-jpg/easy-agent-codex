@@ -1,0 +1,36 @@
+name: Video Pro checks
+on:
+  push:
+    paths: ['video-pro/**', 'integrations/**', '.codex/**', '.github/workflows/video-pro.yml']
+  pull_request:
+    paths: ['video-pro/**', 'integrations/**', '.codex/**', '.github/workflows/video-pro.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: video-pro/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: video-pro
+      - run: npm run check
+        working-directory: video-pro
+      - run: npm test
+        working-directory: video-pro
+      - run: node --test integrations/scripts/check-mcp.test.mjs integrations/scripts/sandcastles-status-mcp.test.mjs integrations/scripts/sandcastle-scaffold.test.mjs
+      - name: Parse Windows setup script
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $tokens = $null
+          $parseErrors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'integrations/scripts/Setup-Integrations.ps1'), [ref]$tokens, [ref]$parseErrors)
+          if ($parseErrors.Count -gt 0) { throw 'Windows setup script has syntax errors.' }

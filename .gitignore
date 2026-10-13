@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.data/
+
+.sandcastle/.env
+.sandcastle/.env.*
+!.sandcastle/.env.example
+.sandcastle/worktrees/
+.sandcastle/logs/
+integrations/runtime/

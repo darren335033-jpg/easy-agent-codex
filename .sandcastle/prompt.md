@@ -1,0 +1,3 @@
+Review the Easy Agent Video Pro project on your assigned isolated branch. Inspect existing tests and identify at most one concrete engineering defect with reproducible evidence. Produce a concise report and, only if a bounded local fix is warranted, implement it with meaningful local verification. Do not merge, push, deploy or change the host branch.
+
+Do not create provider accounts, call generation providers, incur spending, send messages, configure wallets, trade, train models or read/write credentials. Do not install arbitrary dependencies or fetch remote scripts. Existing test mocks are suitable; label any unavailable live validation accurately. Avoid secrets and personal data in reports. Keep changes scoped to this video application. Stop after this one assignment.

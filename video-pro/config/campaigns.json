@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "sendingEnabled": false,
+  "status": "draft",
+  "worldwidePolicy": "Localise language, currency displays, date formats, accessibility and applicable consent/opt-out requirements before release; no assumption of worldwide provider availability.",
+  "sequences": [
+    {
+      "id": "welcome",
+      "name": "Welcome",
+      "audience": "People who explicitly opted in to product emails",
+      "subject": "Welcome to Easy Agent Video Pro 3.1",
+      "body": "Thanks for your interest. Easy Agent Video Pro 3.1 is in development. Explore the preview and share the video workflow you need. Generation and paid plans are not yet available. Manage your email preferences or unsubscribe: {{unsubscribe_url}}.",
+      "status": "draft",
+      "consentRequired": true
+    },
+    {
+      "id": "activation",
+      "name": "First project guidance",
+      "audience": "Opted-in users who have not completed a first project",
+      "subject": "Plan your first video project",
+      "body": "Start with your audience, a short script and a shot list. Add references you have permission to use, then review the planned shots. Live generation availability will be announced when validated. Preferences and unsubscribe: {{unsubscribe_url}}.",
+      "status": "draft",
+      "consentRequired": true
+    },
+    {
+      "id": "reengagement",
+      "name": "Project reminder",
+      "audience": "Opted-in users eligible under a reviewed retention policy",
+      "subject": "Ready to revisit your video idea?",
+      "body": "Your next video can begin with a simple shot plan. Return to review your project when convenient. This email does not promise generation quality or earnings. Preferences and unsubscribe: {{unsubscribe_url}}.",
+      "status": "draft",
+      "consentRequired": true
+    },
+    {
+      "id": "construction",
+      "name": "Construction-sector introduction",
+      "audience": "Opted-in construction business contacts",
+      "subject": "Plan clear construction project videos",
+      "body": "Prepare project explainers, site progress summaries and training storyboards. Review technical and safety information with a qualified person, obtain permission for site footage, and avoid presenting generated scenes as actual project evidence. Reply with the workflow you want to explore. Preferences and unsubscribe: {{unsubscribe_url}}.",
+      "status": "draft",
+      "consentRequired": true
+    },
+    {
+      "id": "localisation",
+      "name": "Localised launch notice",
+      "audience": "Opted-in contacts in individually reviewed launch regions",
+      "subject": "Video workflows in {{locale_name}}",
+      "body": "We are preparing localised workflows for {{locale_name}}. Availability, provider access and billing will be confirmed for your region before launch. No unsupported quality comparisons are made. Preferences and unsubscribe: {{unsubscribe_url}}.",
+      "status": "draft",
+      "consentRequired": true
+    }
+  ]
+}
