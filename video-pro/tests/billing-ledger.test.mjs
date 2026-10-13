@@ -23,8 +23,10 @@ test('paid checkout grants, duplicates are durable and file private', t => {
  const reopened = new BillingLedger({ filePath });
  assert.equal(reopened.process(event('e1'), options).status, 'duplicate');
  reopened.close();
- assert.equal(statSync(filePath).mode & 0o777, 0o600);
- assert.equal(statSync(join(filePath, '..')).mode & 0o777, 0o700);
+ if (process.platform !== 'win32') {
+  assert.equal(statSync(filePath).mode & 0o777, 0o600);
+  assert.equal(statSync(join(filePath, '..')).mode & 0o777, 0o700);
+ }
 });
 test('unpaid and malformed ownership never grant but record retry IDs', t => {
  const { ledger } = fixture(t);

@@ -14,19 +14,20 @@ test('status is a basename-only inventory, excludes symlinks and never reads sec
   await mkdir(path.join(root, 'worktrees', 'shot-one'), { recursive: true });
   await writeFile(path.join(root, 'main.ts'), 'api_key: DO_NOT_EXPOSE');
   await writeFile(path.join(root, 'worktrees', 'plain-file'), 'not a worktree');
-  await symlink(path.join(root, 'worktrees', 'shot-one'), path.join(root, 'worktrees', 'linked'), 'dir');
+  await symlink(path.join(root, 'worktrees', 'shot-one'), path.join(root, 'worktrees', 'linked'), process.platform === 'win32' ? 'junction' : 'dir');
   const actual = await status(cwd);
+  if (process.platform === 'win32') { const alternateCase = await status(cwd.toUpperCase()); assert.equal(alternateCase.configured, true); assert.deepEqual(alternateCase.worktrees, ['shot-one']); }
   assert.equal(actual.upstream, 'https://github.com/mattpocock/sandcastle'); assert.equal(actual.configured, true); assert.deepEqual(actual.worktrees, ['shot-one']); assert.equal(actual.runtimeStatus, 'unverified');
   await rm(path.join(root, 'main.ts')); await writeFile(path.join(root, 'main.mts'), 'DO_NOT_EXPOSE'); assert.equal((await status(cwd)).configured, true); assert.ok(!JSON.stringify(actual).includes(cwd)); assert.ok(!JSON.stringify(actual).includes('DO_NOT_EXPOSE'));
 }));
 test('root and worktree-root symlinks are never traversed', async () => fixture(async cwd => {
   await mkdir(path.join(cwd, 'outside', 'worktrees', 'secret'), { recursive: true });
   await writeFile(path.join(cwd, 'outside', 'main.ts'), 'secret');
-  await symlink(path.join(cwd, 'outside'), path.join(cwd, '.sandcastle'), 'dir');
+  await symlink(path.join(cwd, 'outside'), path.join(cwd, '.sandcastle'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.equal((await status(cwd)).configured, false); assert.deepEqual((await status(cwd)).worktrees, []);
   await rm(path.join(cwd, '.sandcastle'));
   await mkdir(path.join(cwd, '.sandcastle'));
-  await symlink(path.join(cwd, 'outside', 'worktrees'), path.join(cwd, '.sandcastle', 'worktrees'), 'dir');
+  await symlink(path.join(cwd, 'outside', 'worktrees'), path.join(cwd, '.sandcastle', 'worktrees'), process.platform === 'win32' ? 'junction' : 'dir');
   assert.deepEqual((await status(cwd)).worktrees, []);
 }));
 test('protocol handshake and read-only surface', async () => {

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, stat, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { JobStore } from '../lib/jobs.mjs';
 const request = { prompt: 'A cat walks through a sunny garden.' };
 async function fixture(t, options = {}) {
@@ -15,7 +15,7 @@ test('planning is honest, persisted privately and survives reload', async t => {
   const job = await store.create(request);
   assert.equal(job.status, 'planned'); assert.equal(job.videoUrl, undefined);
   assert.equal(job.storyboard.length, 3); assert.equal(job.qc.every(q => q.status === 'pending'), true);
-  assert.equal((await stat(store.filePath)).mode & 0o777, 0o600);
+  if (process.platform !== 'win32') assert.equal((await stat(store.filePath)).mode & 0o777, 0o600);
   const restored = await new JobStore({ filePath: store.filePath }).init();
   assert.deepEqual(restored.get(job.id), job);
   const exposed = store.list(); exposed[0].status = 'succeeded';
@@ -113,16 +113,23 @@ test('live requires idempotency and provider validation precedes intent', async 
   }
   assert.equal(calls,0); assert.equal(store.list().length,0);
 });
-test('symlink storage targets and directories are rejected', async t => {
+test('symlink storage files are rejected', async t => {
+  const { symlink } = await import('node:fs/promises');
+  const store=await fixture(t);
+  try { await symlink(join(dirname(store.filePath),'other.json'),store.filePath,'file'); }
+  catch (error) {
+    if (process.platform === 'win32' && error.code === 'EPERM') { t.skip('Windows file symlinks require Developer Mode or elevated privileges.'); return; }
+    throw error;
+  }
+  await assert.rejects(new JobStore({filePath:store.filePath}).init(),{status:400});
+});
+test('linked storage directories are rejected, including Windows junctions', async t => {
   const { symlink, mkdir } = await import('node:fs/promises');
   const store=await fixture(t);
-  await symlink(join(dirnameForTest(store.filePath),'other.json'),store.filePath);
-  await assert.rejects(new JobStore({filePath:store.filePath}).init(),{status:400});
-  const real=join(dirnameForTest(store.filePath),'real');await mkdir(real);
-  const linked=join(dirnameForTest(store.filePath),'linked');await symlink(real,linked);
+  const real=join(dirname(store.filePath),'real');await mkdir(real);
+  const linked=join(dirname(store.filePath),'linked');await symlink(real,linked,process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(new JobStore({filePath:join(linked,'jobs.json')}).init(),{status:400});
 });
-function dirnameForTest(path) { return path.slice(0,path.lastIndexOf('/')); }
 test('invalid persisted version and excess records are rejected', async t => {
   const {writeFile}=await import('node:fs/promises');
   const store=await fixture(t,{maxJobs:1});

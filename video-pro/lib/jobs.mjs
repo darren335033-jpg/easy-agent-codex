@@ -1,6 +1,7 @@
-import { readFile, writeFile, rename, mkdir, lstat, realpath, chmod } from 'node:fs/promises';
+import { readFile, writeFile, rename, lstat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { protectDirectory } from './storage-security.mjs';
 const fail = (status, message) => Object.assign(new Error(message), { status });
 const clone = value => structuredClone(value);
 function normalize(input) {
@@ -21,9 +22,7 @@ export class JobStore {
     this.jobs = []; this.tail = Promise.resolve();
   }
   async init() {
-    await mkdir(dirname(this.filePath), { recursive: true, mode: 0o700 });
-    if (await realpath(dirname(this.filePath)) !== resolve(dirname(this.filePath))) throw fail(400, 'Job storage directory must not traverse symlinks.');
-    await chmod(dirname(this.filePath), 0o700);
+    await protectDirectory(dirname(resolve(this.filePath)));
     await this.checkStorageTarget();
     try {
       const data = JSON.parse(await readFile(this.filePath, 'utf8'));

@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync, lstatSync, chmodSync, realpathSync } from 'node:fs';
+import { lstatSync, chmodSync } from 'node:fs';
+import { protectDirectorySync } from './storage-security.mjs';
 import { dirname, resolve } from 'node:path';
 
 const supported = new Set(['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'customer.subscription.updated', 'customer.subscription.deleted']);
@@ -12,14 +13,13 @@ export class BillingLedger {
     if (!validText(filePath)) throw new Error('Ledger file path required');
     const target = resolve(filePath);
     const directory = dirname(target);
-    mkdirSync(directory, { recursive: true, mode: 0o700 });
-    if (realpathSync(directory) !== directory) throw new Error('Symlink ledger directory forbidden');
+    protectDirectorySync(directory);
     try {
       const stat = lstatSync(target);
       if (stat.isSymbolicLink() || !stat.isFile()) throw new Error('Ledger target must be a regular file');
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
     this.db = new DatabaseSync(target);
-    chmodSync(target, 0o600);
+    if (process.platform !== 'win32') chmodSync(target, 0o600);
     this.db.exec(`CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, type TEXT NOT NULL, timestamp INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS subscriptions (id TEXT PRIMARY KEY, userId TEXT NOT NULL, planId TEXT NOT NULL, status TEXT NOT NULL, eventCreated INTEGER NOT NULL);`);
   }
