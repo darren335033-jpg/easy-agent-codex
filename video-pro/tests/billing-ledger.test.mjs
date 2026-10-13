@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, statSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, rmSync, statSync, symlinkSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BillingLedger } from '../lib/billing-ledger.mjs';
@@ -71,4 +71,18 @@ test('symlink targets are rejected', t => {
  const linked = join(dir, 'alias.sqlite');
  symlinkSync(filePath, linked);
  assert.throws(() => new BillingLedger({ filePath: linked }), /regular file/);
+});
+test('existing database privacy is restored before reopen and journal links fail closed', t => {
+ const { ledger, filePath, dir } = fixture(t);
+ if (process.platform !== 'win32') {
+  chmodSync(filePath, 0o666);
+  const reopened = new BillingLedger({ filePath });
+  assert.equal(statSync(filePath).mode & 0o777, 0o600);
+  reopened.close();
+ }
+ const journal = filePath + '-journal';
+ symlinkSync(join(dir, 'unrelated'), journal);
+ assert.throws(() => new BillingLedger({ filePath }), /sidecar/);
+ assert.throws(() => ledger.process(event('blocked'), options), /sidecar/);
+ assert.equal(ledger.db.prepare('SELECT COUNT(*) AS count FROM events WHERE id = ?').get('blocked').count, 0);
 });

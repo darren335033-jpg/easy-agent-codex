@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
-import { lstatSync, chmodSync } from 'node:fs';
-import { protectDirectorySync } from './storage-security.mjs';
+import { lstatSync } from 'node:fs';
+import { protectDirectorySync, protectFileSync } from './storage-security.mjs';
 import { dirname, resolve } from 'node:path';
 
 const supported = new Set(['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'customer.subscription.updated', 'customer.subscription.deleted']);
@@ -14,18 +14,45 @@ export class BillingLedger {
     const target = resolve(filePath);
     const directory = dirname(target);
     protectDirectorySync(directory);
+    let targetExists = false;
     try {
       const stat = lstatSync(target);
       if (stat.isSymbolicLink() || !stat.isFile()) throw new Error('Ledger target must be a regular file');
+      targetExists = true;
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
+    if (targetExists) protectFileSync(target);
+    this.filePath = target;
+    this.protectSidecars();
     this.db = new DatabaseSync(target);
-    if (process.platform !== 'win32') chmodSync(target, 0o600);
-    this.db.exec(`CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, type TEXT NOT NULL, timestamp INTEGER NOT NULL);
+    try {
+      protectFileSync(target);
+      this.db.exec('PRAGMA journal_mode=DELETE');
+      this.protectSidecars();
+      this.db.exec(`CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, type TEXT NOT NULL, timestamp INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS subscriptions (id TEXT PRIMARY KEY, userId TEXT NOT NULL, planId TEXT NOT NULL, status TEXT NOT NULL, eventCreated INTEGER NOT NULL);`);
+    } catch (error) {
+      this.db.close();
+      throw error;
+    }
+  }
+
+  protectSidecars() {
+    for (const suffix of ['-journal', '-wal', '-shm']) {
+      const filePath = this.filePath + suffix;
+      let exists = false;
+      try {
+        const stat = lstatSync(filePath);
+        if (stat.isSymbolicLink() || !stat.isFile()) throw new Error('Ledger sidecar must be a regular file');
+        exists = true;
+      } catch (error) { if (error.code !== 'ENOENT') throw error; }
+      if (exists) protectFileSync(filePath);
+    }
   }
 
   process(event, { allowedPlanIds = [] } = {}) {
     if (!event || !validText(event.id) || !validText(event.type) || !Number.isSafeInteger(event.created) || event.created < 0) throw new Error('Invalid billing event envelope');
+    protectFileSync(this.filePath);
+    this.protectSidecars();
     this.db.exec('BEGIN IMMEDIATE');
     try {
       if (this.db.prepare('SELECT id FROM events WHERE id = ?').get(event.id)) {

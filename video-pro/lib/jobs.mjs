@@ -1,7 +1,7 @@
 import { readFile, writeFile, rename, lstat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { protectDirectory } from './storage-security.mjs';
+import { protectDirectory, protectFileSync } from './storage-security.mjs';
 const fail = (status, message) => Object.assign(new Error(message), { status });
 const clone = value => structuredClone(value);
 function normalize(input) {
@@ -44,13 +44,17 @@ export class JobStore {
     return clone(publicJob);
   }
   async checkStorageTarget() {
-    try { if ((await lstat(this.filePath)).isSymbolicLink()) throw fail(400, 'Job storage must not be a symlink.'); }
+    try {
+      if ((await lstat(this.filePath)).isSymbolicLink()) throw fail(400, 'Job storage must not be a symlink.');
+      protectFileSync(this.filePath);
+    }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
   async persist() {
     await this.checkStorageTarget();
     const temporary = `${this.filePath}.${randomUUID()}.tmp`;
     await writeFile(temporary, JSON.stringify({ version: 1, jobs: this.jobs }), { mode: 0o600 });
+    protectFileSync(temporary);
     await rename(temporary, this.filePath);
   }
   transact(action) {
