@@ -24,8 +24,7 @@ $allow=[System.Security.AccessControl.AccessControlType]::Allow
 $rights=[System.Security.AccessControl.FileSystemRights]::FullControl
 $acl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new($owner,$rights,$inherit,$propagation,$allow))
 $acl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new($system,$rights,$inherit,$propagation,$allow))
-Set-Acl -LiteralPath $target -AclObject $acl
-$verified=Get-Acl -LiteralPath $target
+if($isDirectory){[System.IO.Directory]::SetAccessControl($target,$acl);$verified=[System.IO.Directory]::GetAccessControl($target)}else{[System.IO.File]::SetAccessControl($target,$acl);$verified=[System.IO.File]::GetAccessControl($target)}
 if(-not $verified.AreAccessRulesProtected){throw 'Storage ACL is not protected.'}
 if($verified.GetOwner([System.Security.Principal.SecurityIdentifier]).Value -ne $owner.Value){throw 'Storage owner mismatch.'}
 $granted=@{}
