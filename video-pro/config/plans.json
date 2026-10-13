@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "currency": "USD",
+  "status": "draft",
+  "billingEnabled": false,
+  "availability": "draft",
+  "unitEconomicsVerified": false,
+  "pricingIsProposal": true,
+  "allowancePolicy": "No numerical video allowance is finalized until provider unit economics and pricing are verified. No unlimited generation.",
+  "plans": [
+    {
+      "id": "creator",
+      "name": "Creator",
+      "monthlyPriceUsd": 29,
+      "features": [
+        "Script and shot planning",
+        "Video generation workspace",
+        "Export and project history"
+      ],
+      "videoAllowance": {
+        "value": null,
+        "unit": "provider-priced generation credits",
+        "status": "not_finalized"
+      },
+      "availability": "draft"
+    },
+    {
+      "id": "studio",
+      "name": "Studio",
+      "monthlyPriceUsd": 99,
+      "features": [
+        "Creator features",
+        "Multi-shot workflows",
+        "Reference asset organisation",
+        "Team review"
+      ],
+      "videoAllowance": {
+        "value": null,
+        "unit": "provider-priced generation credits",
+        "status": "not_finalized"
+      },
+      "availability": "draft"
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "monthlyPriceUsd": 299,
+      "features": [
+        "Studio features",
+        "Brand and localisation workflows",
+        "Priority support proposal",
+        "Campaign asset preparation"
+      ],
+      "videoAllowance": {
+        "value": null,
+        "unit": "provider-priced generation credits",
+        "status": "not_finalized"
+      },
+      "availability": "draft"
+    }
+  ],
+  "billingRequirements": [
+    "Confirm actual provider costs, failed-job charging and refunds",
+    "Approve margins, included limits, overages and taxes",
+    "Connect and verify Stripe test environment before live activation",
+    "Validate webhook signature, idempotency and entitlement reconciliation"
+  ]
+}

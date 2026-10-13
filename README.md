@@ -1,3 +1,7 @@
+## Video Pro 3.1 development build
+
+The new video workspace is in `video-pro/`. See [its README](video-pro/README.md) for startup, implemented features and current limits. [Integration setup](integrations/README.md) covers OmniRoute, Orca, Codex and documented MCP endpoints. This build does not replace the earlier coding application described below.
+
 # Easy Agent Codex AI 1.1
 
 An independent, local coding workspace by Darren Smith / Easy Agent. This is not

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "total": 1050,
+  "teams": [
+    {
+      "id": "video_engineering",
+      "count": 180,
+      "name": "Video Engineering Specialist",
+      "task": "Implement and inspect a bounded video pipeline component",
+      "deliverable": "Component implementation with reproducible verification"
+    },
+    {
+      "id": "product",
+      "count": 100,
+      "name": "Product Specialist",
+      "task": "Define a bounded user workflow and acceptance criteria",
+      "deliverable": "Workflow specification with accessibility acceptance criteria"
+    },
+    {
+      "id": "security",
+      "count": 90,
+      "name": "Security Specialist",
+      "task": "Review a bounded threat surface and propose mitigations",
+      "deliverable": "Threat assessment and verification evidence"
+    },
+    {
+      "id": "testing",
+      "count": 150,
+      "name": "Testing Specialist",
+      "task": "Verify a bounded behavior under normal and failure conditions",
+      "deliverable": "Reproducible test report with unresolved defects"
+    },
+    {
+      "id": "provider_evaluation",
+      "count": 100,
+      "name": "Provider Evaluation Specialist",
+      "task": "Evaluate a bounded generation scenario using approved providers",
+      "deliverable": "Quality, latency and cost evaluation report"
+    },
+    {
+      "id": "support",
+      "count": 80,
+      "name": "Support Specialist",
+      "task": "Draft guidance for a bounded customer issue",
+      "deliverable": "Reviewed support article or response draft"
+    },
+    {
+      "id": "marketing",
+      "count": 100,
+      "name": "Marketing Specialist",
+      "task": "Prepare a bounded consent-based marketing asset",
+      "deliverable": "Unsent factual campaign asset and localisation review"
+    },
+    {
+      "id": "finance",
+      "count": 60,
+      "name": "Finance Specialist",
+      "task": "Model a bounded unit economics or billing scenario",
+      "deliverable": "Assumption-labelled financial model"
+    },
+    {
+      "id": "operations",
+      "count": 90,
+      "name": "Operations Specialist",
+      "task": "Specify a bounded deployment or incident procedure",
+      "deliverable": "Reviewed operational runbook"
+    },
+    {
+      "id": "localisation",
+      "count": 50,
+      "name": "Localisation Specialist",
+      "task": "Review a bounded locale and construction-sector use case",
+      "deliverable": "Locale-specific terminology and usability review"
+    },
+    {
+      "id": "coordination",
+      "count": 50,
+      "name": "Coordination Specialist",
+      "task": "Review a bounded cross-team dependency",
+      "deliverable": "Dependency record and acceptance checklist"
+    }
+  ],
+  "pilotAgentIds": [
+    "video_engineering-001",
+    "product-001",
+    "security-001",
+    "testing-001",
+    "testing-002",
+    "provider_evaluation-001",
+    "support-001",
+    "marketing-001",
+    "finance-001",
+    "operations-001"
+  ]
+}

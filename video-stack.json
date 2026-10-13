@@ -1,0 +1,23 @@
+{
+  "video_generation": {
+    "primary": "Google Veo 3.1",
+    "alternatives": ["Runway Gen-4.5", "Seedance 2.0"],
+    "strategy": "Compare candidate shots for quality, motion and prompt accuracy"
+  },
+  "storyboards_and_reference_images": "Runway Gen-4 Image",
+  "scripts_and_shot_planning": "A capable reasoning LLM",
+  "voiceover_and_sound_effects": "ElevenLabs",
+  "optional_local_generation": {
+    "workflow_engine": "ComfyUI",
+    "models": ["Wan 2.2", "LTX-Video"]
+  },
+  "editing_and_encoding": "FFmpeg",
+  "final_colour_and_audio": "DaVinci Resolve",
+  "quality_control": [
+    "Character consistency",
+    "Temporal flicker and motion",
+    "Prompt adherence",
+    "Audio synchronization",
+    "Human review"
+  ]
+}
