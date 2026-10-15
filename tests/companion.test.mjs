@@ -15,9 +15,9 @@ import { createLocalServices } from '../server/local-service.mjs';
 const exec = promisify(execFile);
 const freshSecret = () => randomBytes(32).toString('base64url');
 const freshNonce = () => randomBytes(16).toString('base64url');
-function signed(secret, { method = 'GET', pathname = '/api/repository/status', body = '', timestamp = Math.floor(Date.now() / 1000), nonce = freshNonce() } = {}) {
-  const canonical = `${timestamp}\n${nonce}\n${method}\n${pathname}\n${createHash('sha256').update(body).digest('hex')}`;
-  return { 'x-ea-timestamp': String(timestamp), 'x-ea-nonce': nonce, 'x-ea-signature': createHmac('sha256', Buffer.from(secret, 'base64url')).update(canonical).digest('base64url') };
+function signed(secret, { method = 'GET', pathname = '/api/repository/status', body = '', timestamp = Math.floor(Date.now() / 1000), nonce = freshNonce(), requestKey } = {}) {
+  const canonical = `${timestamp}\n${nonce}\n${method}\n${pathname}\n${createHash('sha256').update(body).digest('hex')}${requestKey === undefined ? '' : `\n${requestKey}`}`;
+  return { 'x-ea-timestamp': String(timestamp), 'x-ea-nonce': nonce, 'x-ea-signature': createHmac('sha256', Buffer.from(secret, 'base64url')).update(canonical).digest('base64url'), ...(requestKey === undefined ? {} : { 'idempotency-key': requestKey }) };
 }
 const unauthorized = promise => assert.rejects(promise, error => error.status === 401 && error.code === 'COMPANION_UNAUTHORIZED');
 async function temp(t) {
@@ -60,6 +60,25 @@ test('signature verification binds method, path, body, timestamp, nonce, and sec
     { headers: signed(freshSecret(), { method: 'POST', pathname: '/api/repository/read', body, nonce: headers['x-ea-nonce'] }) },
   ]) await unauthorized(verifier.verify({ method: 'POST', pathname: '/api/repository/read', body, headers, ...changes }));
   assert.equal(await verifier.verify({ method: 'POST', pathname: '/api/repository/read', body, headers }), true);
+});
+
+test('coding retry identifiers bind their presence and value while unsupported or malformed keys fail authentication', async () => {
+  const secret = freshSecret();
+  const verifier = createCompanionVerifier(secret);
+  const method = 'POST', pathname = '/api/coding/start', body = Buffer.from('{"task":"Review implementation"}');
+  const headers = signed(secret, { method, pathname, body, requestKey: 'retry-1' });
+  const removed = { ...headers }; delete removed['idempotency-key'];
+  for (const changed of [removed, { ...headers, 'idempotency-key': 'retry-2' }]) await unauthorized(verifier.verify({ method, pathname, body, headers: changed }));
+  const absent = signed(secret, { method, pathname, body });
+  await unauthorized(verifier.verify({ method, pathname, body, headers: { ...absent, 'idempotency-key': 'retry-1' } }));
+  assert.equal(await verifier.verify({ method, pathname, body, headers }), true);
+  assert.equal(await verifier.verify({ method, pathname, body, headers: absent }), true);
+  for (const requestKey of ['', 'a'.repeat(101), 'has_underscore', 'has space', 'café', ['one', 'two']]) {
+    await unauthorized(verifier.verify({ method, pathname, body, headers: signed(secret, { method, pathname, body, requestKey }) }));
+  }
+  for (const [otherMethod, otherPath] of [['GET', '/api/repository/status'], ['POST', '/api/repository/read'], ['POST', '/api/coding/runs/10000000-0000-4000-8000-000000000000/cancel']]) {
+    await unauthorized(verifier.verify({ method: otherMethod, pathname: otherPath, body, headers: signed(secret, { method: otherMethod, pathname: otherPath, body, requestKey: 'retry-1' }) }));
+  }
 });
 
 test('malformed secrets, signatures, nonces, duplicate headers, and timestamps fail with safe errors', async () => {

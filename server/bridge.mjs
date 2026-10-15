@@ -1,5 +1,7 @@
 // Worker-compatible gateway for a server-configured, authenticated companion.
 // Browser input cannot choose the destination, signing key, or forwarded headers.
+import { companionIdempotencyKey } from './bridge-auth.mjs';
+
 const encoder = new TextEncoder();
 const MAX_REQUEST = 500000;
 const MAX_RESPONSE = 8 * 1024 * 1024;
@@ -92,7 +94,7 @@ function upstreamError(status) {
   return { error: status === 409 ? 'FILE_CONFLICT' : 'COMPANION_REQUEST_FAILED', message: descriptions[status] || 'The companion could not complete this request. Check the local server.' };
 }
 
-/** Proxy only approved JSON API routes, signed over their exact method/path/body. */
+/** Proxy approved JSON API routes, signed over exact method/path/body and coding retry key. */
 export async function proxyCompanion(request, env = {}, options = {}) {
   let timer, controller, onAbort;
   try {
@@ -104,6 +106,9 @@ export async function proxyCompanion(request, env = {}, options = {}) {
     const method = allowedMethod(input.pathname);
     if (!method) throw problem('BRIDGE_ROUTE_NOT_ALLOWED', 'This API route is not available through the companion bridge.', 404);
     if (request.method !== method) throw problem('BRIDGE_METHOD_NOT_ALLOWED', 'Use the documented method for this companion API route.', 405);
+    let requestKey;
+    try { requestKey = companionIdempotencyKey(method, input.pathname, request.headers); }
+    catch { throw problem('BRIDGE_INVALID_REQUEST', 'Idempotency-Key is supported only for POST /api/coding/start and must contain 1–100 ASCII letters, digits or hyphens.', 400); }
     if (method === 'POST' && (request.headers.get('origin') && request.headers.get('origin') !== input.origin || request.headers.get('sec-fetch-site') === 'cross-site')) throw problem('BRIDGE_ORIGIN_BLOCKED', 'Companion actions must originate from this application.', 403);
     if (method === 'POST' && request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') throw problem('BRIDGE_INVALID_REQUEST', 'Send application/json for companion actions.', 415);
     if (Number(request.headers.get('content-length')) > MAX_REQUEST) throw problem('BRIDGE_REQUEST_TOO_LARGE', 'Companion request exceeds the 500,000-byte limit.', 413);
@@ -121,12 +126,12 @@ export async function proxyCompanion(request, env = {}, options = {}) {
       const timestamp = String(Math.floor(Date.now() / 1000)), nonce = base64url(crypto.getRandomValues(new Uint8Array(16)));
       const bodyHash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', body))].map(value => value.toString(16).padStart(2, '0')).join('');
       const key = await crypto.subtle.importKey('raw', signingBytes(env.FORGE_COMPANION_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-      const canonical = `${timestamp}\n${nonce}\n${method}\n${input.pathname}\n${bodyHash}`;
+      const canonical = `${timestamp}\n${nonce}\n${method}\n${input.pathname}\n${bodyHash}${requestKey === null ? '' : `\n${requestKey}`}`;
       const signature = base64url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(canonical))));
       if (signal.aborted) throw problem('BRIDGE_CANCELLED', 'Companion request was cancelled.', 408);
       const fetcher = options.fetch || (typeof globalThis.fetch === 'function' ? globalThis.fetch.bind(globalThis) : undefined);
       if (typeof fetcher !== 'function') throw problem('BRIDGE_UNAVAILABLE', 'Companion transport is unavailable.', 503);
-      const upstream = await fetcher(new URL(input.pathname, endpoint).href, { method, headers: { Accept: 'application/json', ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}), 'X-EA-Timestamp': timestamp, 'X-EA-Nonce': nonce, 'X-EA-Signature': signature }, ...(method === 'POST' ? { body } : {}), redirect: 'manual', signal });
+      const upstream = await fetcher(new URL(input.pathname, endpoint).href, { method, headers: { Accept: 'application/json', ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}), ...(requestKey === null ? {} : { 'Idempotency-Key': requestKey }), 'X-EA-Timestamp': timestamp, 'X-EA-Nonce': nonce, 'X-EA-Signature': signature }, ...(method === 'POST' ? { body } : {}), redirect: 'manual', signal });
       if (upstream.status >= 300 && upstream.status < 400) { await upstream.body?.cancel().catch(() => {}); throw problem('BRIDGE_REDIRECT_BLOCKED', 'Companion redirects are not allowed. Configure its final HTTPS origin.', 502); }
       if (upstream.status < 200 || upstream.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') { await upstream.body?.cancel().catch(() => {}); throw problem('BRIDGE_INVALID_RESPONSE', 'The companion returned an unsupported response.', 502); }
       if (Number(upstream.headers.get('content-length')) > MAX_RESPONSE) { await upstream.body?.cancel().catch(() => {}); throw problem('BRIDGE_RESPONSE_TOO_LARGE', 'Companion response exceeds the 8 MiB limit.', 502); }

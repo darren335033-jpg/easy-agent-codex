@@ -1,4 +1,4 @@
-# Easy Agent AI 1.4
+# Easy Agent AI 1.4.1
 
 An independent coding workspace for Darren “Dazza” Smith. The local app connects a real repository to an AI tool loop, stages proposed edits for review, runs tests in disposable gVisor containers, and supports actual Git branches and commits. Models come from your authenticated OpenAI API project, Google Vertex AI project, or local Ollama installation.
 
@@ -6,7 +6,7 @@ The hosted interface also includes a browser project editor, 50 configurable spe
 
 ## Repository versions and deployment provenance
 
-This branch adds the tested Easy Agent AI 1.4 source. The original repository README is preserved byte-for-byte in [the v1.1 Windows guide](docs/legacy-windows-v1.1.md). Its Windows launcher, local port, and Supabase instructions describe that earlier distribution; they are not installation steps for this source tree.
+This tree contains the tested Easy Agent AI 1.4 source. The original repository README is preserved byte-for-byte in [the v1.1 Windows guide](docs/legacy-windows-v1.1.md). Its Windows launcher, local port, and Supabase instructions describe that earlier distribution; they are not installation steps for this source tree.
 
 The application files originate from source commit `eac462cbebf21873be44e4dbe0abfdbcacbe9501`. The included `.openai/hosting.json` records the existing private Sites project's nonsecret identity. It is deployment provenance for the current project, not a credential or a generic hosting template. Local development needs no Sites login. A separate hosted deployment needs its own hosting configuration and authorization; this repository does not deploy automatically.
 
@@ -146,7 +146,7 @@ The tunnel process only needs its own tunnel configuration and credentials; keep
 
 In the private hosted app's server configuration, set `FORGE_COMPANION_URL` to the HTTPS origin, such as `https://companion.example.com`, and set `FORGE_COMPANION_SECRET` to the matching server secret. Use an origin without credentials, extra paths, query parameters, or fragments. Apply that configuration through your hosting provider, then check the actual companion connection, repository status, model availability, and runner status in the online workbench. An endpoint appearing in configuration does not establish a working connection. Activation requires your real reachable HTTPS endpoint; a placeholder URL cannot connect a repository.
 
-The gateway forwards only the allowed repository, coding-task, status, model-discovery, and fixed CLI-read operations. Requests carry an HMAC signature, timestamp, and nonce; the companion rejects invalid signatures, expired requests, and nonce replays. The browser receives operation results without receiving the signing secret. There is no arbitrary shell, terminal, OAuth-route forwarding, or general-purpose proxy in this bridge.
+The gateway forwards only the allowed repository, coding-task, status, model-discovery, and fixed CLI-read operations. Requests carry an HMAC signature, timestamp, and nonce; the companion rejects invalid signatures, expired requests, and nonce replays. The browser receives operation results without receiving the signing secret. With the gateway and companion on 1.4.1 or later, `POST /api/coding/start` accepts an optional `Idempotency-Key` of 1–100 letters, digits, or hyphens. The key is included in the signature and preserved by the companion. Matching retries reuse a saved run in the companion’s latest 100-record history window; a different request with that key is rejected while it remains in that window. The key is scoped to coding-task admission, not arbitrary writes. Requests without this header retain the original signature format. There is no arbitrary shell, terminal, OAuth-route forwarding, or general-purpose proxy in this bridge.
 
 Provider configuration remains specific to each runtime. A repository coding task runs on the companion and uses **the companion's** Ollama or Vertex credentials and model settings. Hosted quick tasks and specialist model calls use **the hosted app's** provider configuration. Google credentials placed in one runtime are not transferred to the other. CLI reads use the companion's existing CLI logins. OAuth integrations in the hosted interface keep their separate hosted sessions.
 

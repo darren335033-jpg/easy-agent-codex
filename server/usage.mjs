@@ -3,7 +3,7 @@
 const LIMIT = 100;
 const MAX = Number.MAX_SAFE_INTEGER;
 const FIELDS = ['promptTokenCount', 'candidatesTokenCount', 'totalTokenCount', 'cachedInputTokenCount', 'reasoningTokenCount'];
-const STATUSES = new Set(['completed', 'failed', 'cancelled', 'queued', 'running', 'interrupted']);
+const STATUSES = new Set(['completed', 'failed', 'cancelled', 'queued', 'running', 'interrupted', 'incomplete']);
 const isObject = value => !!value && typeof value === 'object' && !Array.isArray(value);
 const count = value => Number.isSafeInteger(value) && value >= 0 ? value : null;
 const add = (a, b) => a > MAX - b ? MAX : a + b;

@@ -56,6 +56,26 @@ test('event fallback recovers partial runs and does not treat the aggregate plac
   assert.equal(summary.recent.find(item => item.id === 'partial').usageStatus, 'reported');
 });
 
+test('stalled and step-budget coding runs retain incomplete status and reported usage', () => {
+  const summary = summarizeUsage([
+    record({ id: 'stalled', status: 'incomplete', inferenceCalls: 3, error: { code: 'STALLED' }, usage: { promptTokenCount: 30, candidatesTokenCount: 12, totalTokenCount: 42 }, usageCoverage: { reportedCalls: 3, unreportedCalls: 0 } }),
+    record({ id: 'step-limit', status: 'incomplete', inferenceCalls: 5, error: { code: 'STEP_LIMIT' }, usage: { promptTokenCount: 50, candidatesTokenCount: 18, totalTokenCount: 68 }, usageCoverage: { reportedCalls: 5, unreportedCalls: 0 } }),
+  ]);
+  assert.equal(summary.runs.total, 2);
+  assert.equal(summary.runs.other, 2);
+  assert.equal(summary.runs.active, 0);
+  assert.equal(summary.runs.completed, 0);
+  assert.equal(summary.runs.withUsage, 2);
+  assert.equal(summary.calls.reported, 8);
+  assert.equal(summary.calls.completedWithUsage, 8);
+  assert.equal(summary.tokens.totalTokenCount, 110);
+  assert.equal(summary.byModel[0].tokens.totalTokenCount, 110);
+  for (const recent of summary.recent) {
+    assert.equal(recent.status, 'incomplete');
+    assert.equal(recent.usageStatus, 'reported');
+  }
+});
+
 test('details omitted by older aggregate records are recovered without adding the total twice', () => {
   const summary = summarizeUsage([record({ usage: { promptTokenCount: 20, candidatesTokenCount: 8, totalTokenCount: 28 }, events: [{ type: 'model_completed', usage: { totalTokenCount: 28, cachedInputTokenCount: 12, reasoningTokenCount: 3 } }] })]);
   assert.equal(summary.tokens.totalTokenCount, 28);

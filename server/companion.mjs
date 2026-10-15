@@ -8,7 +8,7 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { handleApi, json } from './api.mjs';
 import { createLocalServices } from './local-service.mjs';
-import { createCompanionVerifier } from './bridge-auth.mjs';
+import { companionIdempotencyKey, createCompanionVerifier } from './bridge-auth.mjs';
 
 const exec = promisify(execFile);
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -99,6 +99,7 @@ export async function createCompanionServer({ env = process.env, appRoot = defau
       if (req.headers.origin || req.headers['sec-fetch-site']) throw fail('Browser requests cannot access the signed companion API.', 403, 'COMPANION_BROWSER_BLOCKED');
       const url = new URL(req.url, 'http://127.0.0.1');
       if (req.url !== url.pathname || !req.url.startsWith('/') || req.url.startsWith('//')) throw fail('Companion routes do not accept queries or alternate paths.', 404, 'NOT_FOUND');
+      const requestKey = companionIdempotencyKey(req.method, url.pathname, req.headers);
       if (req.method === 'GET' && url.pathname === '/health') {
         if (req.headers['transfer-encoding'] || (req.headers['content-length'] && req.headers['content-length'] !== '0')) throw fail('Health requests must not contain a body.');
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
@@ -111,7 +112,7 @@ export async function createCompanionServer({ env = process.env, appRoot = defau
       if (req.method === 'POST' && !/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(req.headers['content-type'] || '')) throw fail('Companion actions require JSON.', 415, 'COMPANION_CONTENT_TYPE');
       await verifier.verify({ method: req.method, pathname: url.pathname, headers: req.headers, body: raw });
       const actualPort = server.address()?.port || port;
-      const request = new Request(`http://127.0.0.1:${actualPort}${url.pathname}`, { method: req.method, headers: { Accept: 'application/json', ...(req.method === 'POST' ? { 'Content-Type': 'application/json' } : {}) }, ...(req.method === 'POST' ? { body: raw } : {}), signal: controller.signal });
+      const request = new Request(`http://127.0.0.1:${actualPort}${url.pathname}`, { method: req.method, headers: { Accept: 'application/json', ...(req.method === 'POST' ? { 'Content-Type': 'application/json' } : {}), ...(requestKey === null ? {} : { 'Idempotency-Key': requestKey }) }, ...(req.method === 'POST' ? { body: raw } : {}), signal: controller.signal });
       const response = await handleApi(request, env, { runtime: 'local', hasADC, ...(hasADC ? { tokenProvider } : {}), providerHealth: localServices.health, cliRun: localServices.cliRun, localHandler: async (endpoint, input, trustedRequest) => {
         if (endpoint === '/api/companion/cli/status') {
           if (typeof localServices.cliStatus !== 'function') throw fail('Companion CLI services are unavailable.', 503);

@@ -26,6 +26,14 @@ function header(headers, name) {
   return value;
 }
 
+/** Only coding admission accepts this optional, signed retry identifier. */
+export function companionIdempotencyKey(method, pathname, headers) {
+  const value = typeof headers?.get === 'function' ? headers.get('idempotency-key') : headers?.['idempotency-key'];
+  if (value === undefined || value === null) return null;
+  if (method !== 'POST' || pathname !== '/api/coding/start' || typeof value !== 'string' || !/^[A-Za-z0-9-]{1,100}$/.test(value)) throw unauthorized();
+  return value;
+}
+
 /** HMAC verifier shared across Node and WebCrypto runtimes. Nonces stay process-local. */
 export function createCompanionVerifier(secret, { now = () => Date.now(), maxNonces = 10_000 } = {}) {
   if (typeof now !== 'function' || !Number.isInteger(maxNonces) || maxNonces < 1 || maxNonces > 100_000) throw new Error('Invalid companion verifier configuration.');
@@ -35,6 +43,7 @@ export function createCompanionVerifier(secret, { now = () => Date.now(), maxNon
   return {
     async verify({ method, pathname, headers, body = new Uint8Array() }) {
       if (!['GET', 'POST'].includes(method) || typeof pathname !== 'string' || !pathname.startsWith('/') || pathname.includes('?') || pathname.includes('#') || !(body instanceof Uint8Array)) throw unauthorized();
+      const requestKey = companionIdempotencyKey(method, pathname, headers);
       const timestamp = header(headers, 'x-ea-timestamp');
       const nonce = header(headers, 'x-ea-nonce');
       const signature = header(headers, 'x-ea-signature');
@@ -46,7 +55,8 @@ export function createCompanionVerifier(secret, { now = () => Date.now(), maxNon
       const signatureBytes = fromBase64url(signature, 32);
       const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', body));
       const hex = Array.from(digest, byte => byte.toString(16).padStart(2, '0')).join('');
-      const canonical = encoder.encode(`${timestamp}\n${nonce}\n${method}\n${pathname}\n${hex}`);
+      // Preserve the original protocol bytes when no retry identifier is present.
+      const canonical = encoder.encode(`${timestamp}\n${nonce}\n${method}\n${pathname}\n${hex}${requestKey === null ? '' : `\n${requestKey}`}`);
       if (!await crypto.subtle.verify('HMAC', await key, signatureBytes, canonical)) throw unauthorized();
       const claimedAt = now();
       if (!Number.isFinite(claimedAt) || Math.abs(Math.floor(claimedAt / 1000) - seconds) > 60) throw unauthorized();

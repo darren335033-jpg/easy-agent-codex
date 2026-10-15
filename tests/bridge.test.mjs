@@ -103,6 +103,40 @@ test('gateway signatures interoperate with the companion verifier and cannot aut
   assert.deepEqual(await result.json(), { verified: true });
 });
 
+test('coding retry identifiers are the only extra forwarded header and are covered by the HMAC', async () => {
+  for (const requestKey of ['A', 'Retry-123', 'a'.repeat(100)]) {
+    const result = await proxyCompanion(incoming('/api/coding/start', { method: 'POST', body: { task: 'Review café 🦘', provider: 'local' }, headers: { 'Idempotency-Key': requestKey, 'X-Extra-Header': 'must-not-forward' } }), env, { fetch: async (url, init) => {
+      const headers = new Headers(init.headers);
+      assert.equal(headers.get('idempotency-key'), requestKey);
+      assert.equal(headers.get('x-extra-header'), null);
+      const canonical = `${headers.get('x-ea-timestamp')}\n${headers.get('x-ea-nonce')}\nPOST\n/api/coding/start\n${createHash('sha256').update(Buffer.from(init.body)).digest('hex')}\n${requestKey}`;
+      assert.equal(headers.get('x-ea-signature'), createHmac('sha256', Buffer.from(secret, 'base64url')).update(canonical).digest('base64url'));
+      const verifier = createCompanionVerifier(secret);
+      const signed = { method: init.method, pathname: new URL(url).pathname, headers, body: init.body };
+      for (const changed of [null, `${requestKey === 'A' ? 'B' : 'A'}`]) {
+        const tampered = new Headers(headers);
+        if (changed === null) tampered.delete('idempotency-key'); else tampered.set('idempotency-key', changed);
+        await assert.rejects(verifier.verify({ ...signed, headers: tampered }), error => error.status === 401);
+      }
+      assert.equal(await verifier.verify(signed), true);
+      return json({ id: '10000000-0000-4000-8000-000000000000' }, 202);
+    } });
+    assert.equal(result.status, 202);
+  }
+});
+
+test('invalid or unsupported coding retry identifiers are rejected before transport', async () => {
+  for (const requestKey of ['', 'a'.repeat(101), 'has_underscore', 'has space', 'café', 'first,second']) {
+    const result = await proxyCompanion(incoming('/api/coding/start', { method: 'POST', body: {}, headers: { 'Idempotency-Key': requestKey } }), env, { fetch: noFetch });
+    assert.equal(result.status, 400, requestKey);
+    assert.equal((await result.json()).error, 'BRIDGE_INVALID_REQUEST');
+  }
+  for (const [pathname, method] of [['/api/repository/status', 'GET'], ['/api/repository/read', 'POST'], ['/api/coding/runs/10000000-0000-4000-8000-000000000000/cancel', 'POST']]) {
+    const result = await proxyCompanion(incoming(pathname, { method, ...(method === 'POST' ? { body: {} } : {}), headers: { 'Idempotency-Key': 'valid-key' } }), env, { fetch: noFetch });
+    assert.equal(result.status, 400, pathname);
+  }
+});
+
 test('every allowed read/action route has its exact method and unique nonces, including durable start and typed CLI', async () => {
   const id = 'a23fb848-cf18-4b91-b55e-43c133b1a124';
   const reads = ['/api/status', '/api/provider/models', '/api/repository/status', '/api/coding/runs', `/api/coding/runs/${id}`, '/api/companion/cli/status'];
@@ -180,7 +214,7 @@ test('non-JSON, malformed, oversized and network failures are bounded and saniti
 
 test('deadlines and cancellation abort active companion requests without reporting successful work', async () => {
   let timeoutSignal;
-  const timedOut = await proxyCompanion(incoming('/api/status'), env, { timeoutMs: 10, fetch: async (url, init) => { timeoutSignal = init.signal; return new Promise(() => {}); } });
+  const timedOut = await proxyCompanion(incoming('/api/status'), env, { timeoutMs: 1000, fetch: async (url, init) => { timeoutSignal = init.signal; return new Promise(() => {}); } });
   assert.equal(timedOut.status, 504);
   assert.equal((await timedOut.json()).error, 'BRIDGE_TIMEOUT');
   assert.equal(timeoutSignal.aborted, true);
