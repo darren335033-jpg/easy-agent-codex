@@ -1,0 +1,121 @@
+{
+  "updated": "2026-10-15",
+  "verification": "Anonymous public homepage read, not a comprehensive functioning application audit",
+  "organization": "Easy Agent",
+  "original_application_source_included": false,
+  "unique_public_websites": 9,
+  "groups": [
+    {
+      "lot": 1,
+      "count": 8,
+      "verified": true
+    },
+    {
+      "lot": 2,
+      "count": 1,
+      "verified": true
+    }
+  ],
+  "kooks_public_sites": 4,
+  "sites": [
+    {
+      "title": "Easy Agent AI",
+      "category": "Business",
+      "subtitle": "AI software, creative direction and business systems",
+      "url": "https://easy-agent.org/",
+      "account": "Brand",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "Easy Agent AI Agency",
+      "category": "Engineering",
+      "subtitle": "Software engineering, AI systems and automation",
+      "url": "https://easy-agent-engineering-adelaide.ds235032.chatgpt.site/",
+      "account": "Sites",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "EasyAgent Firefly Studio",
+      "category": "Creative",
+      "subtitle": "Generative-AI creative production and workflows",
+      "url": "https://easyagent-firefly-studio.kooks2350.chatgpt.site/",
+      "account": "Kooks",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "Easy Online Business Agent",
+      "category": "Business",
+      "subtitle": "Practical operating systems for online businesses",
+      "url": "https://easy-onlinebusiness-agent.kooks2350.chatgpt.site/",
+      "account": "Kooks",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "Easy NBA Agent Pro",
+      "category": "Sports",
+      "subtitle": "Basketball operations proposal; not an NBA-affiliated product",
+      "url": "https://easy-nba-agent-proposal.kooks2350.chatgpt.site/",
+      "account": "Kooks",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "EasyRoute",
+      "category": "Local AI",
+      "subtitle": "Windows local-AI workspace and installation information",
+      "url": "https://easyroute.ds235032.chatgpt.site/",
+      "account": "Sites",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "Easy Usage",
+      "category": "Local AI",
+      "subtitle": "Local-processing companion and setup information",
+      "url": "https://easy-usage.ds235032.chatgpt.site/",
+      "account": "Sites",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "Easy Weekly",
+      "category": "Local AI",
+      "subtitle": "Local AI job queue and installation information",
+      "url": "https://easy-weekly.ds235032.chatgpt.site/",
+      "account": "Sites",
+      "lot": 1,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    },
+    {
+      "title": "Easy Video Pro 2.5",
+      "category": "Creative",
+      "subtitle": "AI video studio with text-to-video and image-to-video concepts",
+      "url": "https://easy-video-pro-25.kooks2350.chatgpt.site/",
+      "account": "Kooks",
+      "lot": 2,
+      "public_homepage_verified": true,
+      "full_site_functionality_verified": false,
+      "website_sale_ready_verified": false
+    }
+  ]
+}
