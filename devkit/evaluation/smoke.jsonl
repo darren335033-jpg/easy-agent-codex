@@ -1,0 +1,2 @@
+{"task_id":"trusted-smoke/add","prompt":"def add(a, b):\n","completion":"    return a + b\n","tests":["assert add(2, 3) == 5","assert add(-1, 1) == 0"]}
+{"task_id":"trusted-smoke/reverse","prompt":"","completion":"def reverse(value):\n    return value[::-1]\n","tests":["assert reverse('dazza') == 'azzad'"]}

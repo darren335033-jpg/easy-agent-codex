@@ -1,0 +1,27 @@
+{
+  "files": [
+    {
+      "path": "/assets/founder-portrait.jpg",
+      "mime": "image/jpeg",
+      "size": 185332
+    },
+    {
+      "path": "/assets/founder-brand-reference.jpg",
+      "mime": "image/jpeg",
+      "size": 246129
+    },
+    {
+      "path": "/assets/media-thumbnail.jpg",
+      "mime": "image/jpeg",
+      "size": 85440
+    },
+    {
+      "path": "/assets/mascot-studio.mp4",
+      "mime": "video/mp4",
+      "size": 647632
+    }
+  ],
+  "source": "User-provided Easy Agent reference media",
+  "notes": "Portrait JPEGs copied without modification. Thumbnail is an original-size frame at 0.5 seconds from the provided studio video. Video is a 10-second H.264/AAC browser-compatible preview.",
+  "totalBytes": 1164533
+}

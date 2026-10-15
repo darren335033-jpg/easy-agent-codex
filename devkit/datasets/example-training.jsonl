@@ -1,0 +1,2 @@
+{"systemInstruction":{"parts":[{"text":"Write clear Python code and explain important edge cases."}]},"contents":[{"role":"user","parts":[{"text":"Write a Python function add(a, b) that returns their sum."}]},{"role":"model","parts":[{"text":"def add(a, b):\n    return a + b\n"}]}]}
+{"contents":[{"role":"user","parts":[{"text":"Implement is_even(n) in Python for an integer n."}]},{"role":"model","parts":[{"text":"def is_even(n):\n    return n % 2 == 0\n"}]}]}
