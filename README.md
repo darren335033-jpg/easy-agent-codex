@@ -2,6 +2,8 @@
 
 An independent coding workspace for Darren “Dazza” Smith. The local app connects a real repository to an AI tool loop, stages proposed edits for review, runs tests in disposable gVisor containers, and supports actual Git branches and commits. Models come from your authenticated OpenAI API project, Google Vertex AI project, or local Ollama installation.
 
+**Easy Agent AI business address:** Stirling Walk, Redwood Park SA 5097, Australia. Also available in Settings → Setup guide.
+
 The hosted interface also includes a browser project editor, 50 configurable specialist roles, MCP discovery, founder media, and a Model lab. Optional hybrid mode connects the private hosted app to your own Linux companion for repository work, local models, CLI reads, and isolated tests. These are original application features. The project does not include proprietary OpenAI models or promise equivalent model quality.
 
 ## Repository versions and deployment provenance
