@@ -2,6 +2,8 @@
 
 Use the Easy Agent AI identity and supplied media in `assets/`; `assets/manifest.json` records their provenance. Keep the EA mark, charcoal, warm orange, cream, Manrope headings, and DM Sans body consistent with the existing interface. Use Darren M. Smith for formal founder credits and Dazza for personal workspace copy. Preserve faces, logos, media proportions, and accessible HTML copy.
 
+The user-confirmed Easy Agent AI business address is Stirling Walk, Redwood Park SA 5097, Australia. Use it consistently in business details; do not invent a street number or change provider billing profiles from this information alone.
+
 This is an independent coding workspace. Describe only implemented and verified behavior. OpenAI API access and billing are separate from ChatGPT or Codex subscriptions. The 50 specialist roles are configurable model prompts, not separately trained models. A configured provider is not proof that inference worked.
 
 Keep credentials on the server. Never commit `.env`, service-account files, tokens, companion secrets, `.forge` state, private datasets, dependency folders, or build output. Source downloads use the positive allowlist in `scripts/source-files.mjs`; preserve its exclusions.
