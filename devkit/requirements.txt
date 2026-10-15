@@ -1,0 +1,2 @@
+# Managed Gemini SFT client; the web app has its own Node dependencies.
+google-genai==2.31.0
